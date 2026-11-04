@@ -9,3 +9,4 @@ include(cmake/common.cmake)
 
 add_subdirectory(signals)
 add_subdirectory(daytime-udp-server)
+add_subdirectory(daytime-udp-client)
