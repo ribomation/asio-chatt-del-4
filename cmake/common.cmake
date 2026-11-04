@@ -30,3 +30,11 @@ target_link_libraries(asio_common INTERFACE Boost::headers Threads::Threads)
 # Utan denna innehåller system_error::what() sökväg, radnummer och funktionsnamn
 # från Asios interna headers. Med den blir felmeddelandet bara "connect: Connection refused".
 target_compile_definitions(asio_common INTERFACE BOOST_ASIO_DISABLE_ERROR_LOCATION)
+
+# TLS via asio::ssl kräver OpenSSL. Ett eget target, så att bara de program som
+# behöver det länkar mot libssl/libcrypto.
+find_package(OpenSSL REQUIRED)
+message(STATUS "OpenSSL ${OPENSSL_VERSION}")
+add_library(asio_ssl INTERFACE)
+add_library(asio::ssl ALIAS asio_ssl)
+target_link_libraries(asio_ssl INTERFACE asio::common OpenSSL::SSL OpenSSL::Crypto)
