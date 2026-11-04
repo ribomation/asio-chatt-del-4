@@ -5,7 +5,10 @@
 // std::thread per läsning, eftersom vanliga filanrop blockerar. Med io_uring
 // gör kärnan filläsningen asynkron på riktigt, och Asio behöver ingen trådpool.
 //
-// Kräver BOOST_ASIO_HAS_IO_URING och liburing (se CMakeLists.txt).
+// Kräver BOOST_ASIO_HAS_IO_URING och liburing (se CMakeLists.txt). Dessutom
+// BOOST_ASIO_HAS_IO_URING_AS_DEFAULT, som en workaround för en bugg i Boost
+// 1.92: med epoll som reaktor och io_uring vid sidan om hänger programmet vid
+// fler än 128 samtidiga completions, dvs några hundra filer.
 #include <boost/asio.hpp>
 #include <algorithm>
 #include <array>
