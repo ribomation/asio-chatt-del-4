@@ -58,8 +58,8 @@ auto discover(Options& opts) -> awaitable<void> {
     auto timer = asio::steady_timer{ex, discovery_timeout};
     auto buf = std::array<char, 64>{};
     auto sender = udp::endpoint{};
-    auto result = co_await (socket.async_receive_from(asio::buffer(buf), sender, asio::use_awaitable) ||
-                            timer.async_wait(asio::use_awaitable));
+    auto result = co_await (socket.async_receive_from(asio::buffer(buf), sender, asio::use_awaitable) 
+                         || timer.async_wait(asio::use_awaitable));
     if (result.index() == TIMEOUT) throw std::runtime_error{std::format("ingen chattserver svarade inom {}", discovery_timeout)};
 
     auto reply = std::istringstream{std::string{buf.data(), std::get<0>(result)}};
