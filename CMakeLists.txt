@@ -8,3 +8,4 @@ project(asio-chatt-del-4 LANGUAGES CXX)
 include(cmake/common.cmake)
 
 add_subdirectory(signals)
+add_subdirectory(daytime-udp-server)
