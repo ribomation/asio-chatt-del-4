@@ -3,6 +3,7 @@
 några rader med slumpmässiga mellanrum och kopplar ned. Bara standardbiblioteket.
 
     ./chat-sim.py --clients 200 --messages 20
+    ./chat-sim.py --clients 200 --messages 20 --tls --ca ../certs/server.crt
 """
 import argparse, asyncio, random, ssl
 
@@ -13,15 +14,21 @@ async def discard(reader):
 
 
 async def client(n, args):
+    # Serverns självsignerade cert är enda CA. Hostname-kontrollen i Python är
+    # på, så namnet måste stå i certets SAN, oavsett vilken adress vi ansluter till.
     ctx = ssl.create_default_context(cafile=args.ca) if args.tls else None
-    reader, writer = await asyncio.open_connection(args.host, args.port, ssl=ctx)
+    reader, writer = await asyncio.open_connection(args.host, args.port, ssl=ctx,
+                                                   server_hostname="localhost" if ctx else None)
     sink = asyncio.create_task(discard(reader))
-    for i in range(args.messages):
-        writer.write(f"klient-{n}: meddelande {i}\n".encode())
-        await writer.drain()
-        await asyncio.sleep(random.uniform(args.min_delay, args.max_delay))
-    writer.close()
-    await writer.wait_closed()
+    try:
+        for i in range(args.messages):
+            writer.write(f"klient-{n}: meddelande {i}\n".encode())
+            await writer.drain()
+            await asyncio.sleep(random.uniform(args.min_delay, args.max_delay))
+        writer.close()
+        await writer.wait_closed()
+    except (ConnectionError, ssl.SSLError):
+        print(f"klient-{n}: servern stängde")
     sink.cancel()
 
 
